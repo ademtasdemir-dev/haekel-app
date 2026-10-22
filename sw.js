@@ -1,9 +1,11 @@
 // Aendere VERSION bei jedem Update, dann laedt das Handy die neuen Dateien.
-const VERSION = 'v2';
+const VERSION = 'v3';
 const SHELL = [
   './',
   './index.html',
   './projects.js',
+  './merke.js',
+  './video.js',
   './manifest.webmanifest',
   './assets/icon-192.png',
   './assets/icon-512.png',

@@ -24,10 +24,15 @@ input{width:100%;font-size:21px;padding:14px 16px;border:2px solid #d9c3b2;borde
 .share{flex:0 0 auto;background:#25a244;color:#fff;border:0;border-radius:10px;font-size:19px;font-weight:bold;padding:10px 14px;cursor:pointer}
 .empty{text-align:center;color:#7a5f52;margin-top:30px;display:none}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#222;color:#fff;padding:12px 20px;border-radius:10px;font-size:18px;display:none}
+.cont{display:none;background:#25a244;color:#fff;border-radius:18px;padding:14px;margin-bottom:18px;text-decoration:none;box-shadow:0 3px 10px rgba(0,0,0,.15);align-items:center;gap:14px}
+.cont img{width:84px;height:84px;object-fit:cover;border-radius:12px;flex:0 0 auto}
+.cont .h{font-size:17px;opacity:.95}.cont .b{font-weight:bold;font-size:22px}.cont .m{font-size:18px}
+.badge{margin:0 14px 10px;background:#d7e6fb;color:#1d4f9c;border-radius:10px;padding:6px 10px;font-size:17px;font-weight:bold}
 footer{text-align:center;color:#8c7467;font-size:15px;margin:36px 0 24px}
 </style></head><body>
 <header><h1>🧶 Tığ İşi Tarifleri</h1><p>Tüm tariflerim tek yerde</p></header>
 <main>
+<a class="cont" id="cont" href="#"></a>
 <input id="q" type="search" placeholder="Tarif ara…" autocomplete="off">
 <div class="grid" id="grid"></div>
 <p class="empty" id="empty">Hiç tarif bulunamadı.</p>
@@ -39,6 +44,7 @@ footer{text-align:center;color:#8c7467;font-size:15px;margin:36px 0 24px}
   <div style="font-size:15px;opacity:.95;margin-top:4px">Tek tıkla ana ekrana ekle, internetsiz de çalışsın</div>
 </div>
 <script src="projects.js"></script>
+<script src="merke.js"></script>
 <script>
 var DEFAULT_PROJECTS = [
   {
@@ -75,11 +81,26 @@ function render(){
     var o=document.createElement('a');o.href=p.url;o.style.cssText='flex:1;text-decoration:none';o.innerHTML='<span>Aç</span>';
     var b=document.createElement('button');b.className='share';b.type='button';b.textContent='📤 Paylaş';b.onclick=function(){paylas(p)};
     act.appendChild(o);act.appendChild(b);
+    var m=window.MERKE&&MERKE.get(p.url);
+    if(m&&m.step>1){var bd=document.createElement('div');bd.className='badge';a.href=p.url+'#'+m.id;bd.textContent='📌 Kaldığın yer: Adım '+m.step+' / '+m.total;a.appendChild(bd);o.href=p.url+'#'+m.id;o.innerHTML='<span>Devam et</span>'}
     c.appendChild(a);c.appendChild(act);grid.appendChild(c);
   });
   empty.style.display=n?'none':'block';
 }
-q.addEventListener('input',render);render();
+function devam(){
+  var el=document.getElementById('cont'),m=window.MERKE&&MERKE.last();
+  if(!m||m.step<2){el.style.display='none';return}
+  var list=(window.PROJECTS&&window.PROJECTS.length)?window.PROJECTS:DEFAULT_PROJECTS,p=null;
+  list.forEach(function(x){if(new URL(x.url,location.href).pathname===m.url)p=x});
+  if(!p){el.style.display='none';return}
+  el.href=p.url+'#'+m.id;
+  el.innerHTML='<img alt=""><div><div class="h">📌 Kaldığın yerden devam et</div><div class="b"></div><div class="m"></div></div>';
+  el.querySelector('img').src=p.cover;el.querySelector('.b').textContent=p.title;
+  el.querySelector('.m').textContent='Adım '+m.step+' / '+m.total+' – '+m.title+' • '+MERKE.when(m.t);
+  el.style.display='flex';
+}
+q.addEventListener('input',render);render();devam();
+window.addEventListener('pageshow',function(){render();devam()});
 
 var deferredPrompt;
 var installBox = document.getElementById('installBox');
