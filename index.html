@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="tr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tığ İşi Tarifleri</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#b4533c">
+<link rel="icon" href="assets/icon-192.png">
+<link rel="apple-touch-icon" href="assets/icon-192.png">
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;font-size:20px;background:#fbf4ec;color:#2b1d17}
+header{background:#b4533c;color:#fff;padding:26px 18px 22px;text-align:center}
+header h1{margin:0;font-size:32px}
+header p{margin:6px 0 0;font-size:18px;opacity:.9}
+main{max-width:900px;margin:0 auto;padding:18px}
+input{width:100%;font-size:21px;padding:14px 16px;border:2px solid #d9c3b2;border-radius:14px;background:#fff;margin-bottom:18px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px}
+.card{background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.12);text-decoration:none;color:inherit;display:flex;flex-direction:column}
+.card img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;background:#eee}
+.card .t{padding:12px 14px 4px;font-weight:bold;font-size:22px}
+.card .s{padding:0 14px 12px;color:#7a5f52;font-size:17px}
+.card .act{display:flex;gap:8px;padding:0 14px 14px}
+.card .act span{flex:1;text-align:center;background:#b4533c;color:#fff;padding:10px;border-radius:10px;font-weight:bold}
+.share{flex:0 0 auto;background:#25a244;color:#fff;border:0;border-radius:10px;font-size:19px;font-weight:bold;padding:10px 14px;cursor:pointer}
+.empty{text-align:center;color:#7a5f52;margin-top:30px;display:none}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#222;color:#fff;padding:12px 20px;border-radius:10px;font-size:18px;display:none}
+footer{text-align:center;color:#8c7467;font-size:15px;margin:36px 0 24px}
+</style></head><body>
+<header><h1>🧶 Tığ İşi Tarifleri</h1><p>Tüm tariflerim tek yerde</p></header>
+<main>
+<input id="q" type="search" placeholder="Tarif ara…" autocomplete="off">
+<div class="grid" id="grid"></div>
+<p class="empty" id="empty">Hiç tarif bulunamadı.</p>
+<footer>Oğlum Adem'den sevgiyle ❤️</footer>
+</main>
+<div class="toast" id="toast"></div>
+<script src="projects.js"></script>
+<script>
+var grid=document.getElementById('grid'),q=document.getElementById('q'),empty=document.getElementById('empty');
+function toast(t){var e=document.getElementById('toast');e.textContent=t;e.style.display='block';setTimeout(function(){e.style.display='none'},2600)}
+function abs(u){return new URL(u,location.href).href}
+async function paylas(p){
+  var url=abs(p.url),text=p.title+' - adım adım resimli tarif';
+  if(navigator.share){try{await navigator.share({title:p.title,text:text,url:url});return}catch(e){if(e&&e.name==='AbortError')return}}
+  try{await navigator.clipboard.writeText(text+'\n'+url);toast('Bağlantı kopyalandı, WhatsApp\'a yapıştır')}
+  catch(e){window.open('https://wa.me/?text='+encodeURIComponent(text+'\n'+url),'_blank')}
+}
+function render(){
+  var s=q.value.trim().toLocaleLowerCase('tr');
+  grid.innerHTML='';var n=0;
+  var list=(window.PROJECTS||[]).slice().sort(function(a,b){return (b.date||'').localeCompare(a.date||'')});
+  list.forEach(function(p){
+    if(s&&(p.title+' '+(p.sub||'')).toLocaleLowerCase('tr').indexOf(s)<0)return;
+    n++;
+    var c=document.createElement('div');c.className='card';
+    var a=document.createElement('a');a.href=p.url;a.style.cssText='text-decoration:none;color:inherit';
+    a.innerHTML='<img src="'+p.cover+'" alt=""><div class="t"></div><div class="s"></div>';
+    a.querySelector('.t').textContent=p.title;a.querySelector('.s').textContent=p.sub||'';
+    var act=document.createElement('div');act.className='act';
+    var o=document.createElement('a');o.href=p.url;o.style.cssText='flex:1;text-decoration:none';o.innerHTML='<span>Aç</span>';
+    var b=document.createElement('button');b.className='share';b.type='button';b.textContent='📤 Paylaş';b.onclick=function(){paylas(p)};
+    act.appendChild(o);act.appendChild(b);
+    c.appendChild(a);c.appendChild(act);grid.appendChild(c);
+  });
+  empty.style.display=n?'none':'block';
+}
+q.addEventListener('input',render);render();
+if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(function(){})}
+</script></body></html>
