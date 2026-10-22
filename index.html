@@ -34,8 +34,22 @@ footer{text-align:center;color:#8c7467;font-size:15px;margin:36px 0 24px}
 <footer>Oğlum Adem'den sevgiyle ❤️</footer>
 </main>
 <div class="toast" id="toast"></div>
+<div id="installBox" style="display:none;background:#25a244;color:#fff;border-radius:14px;padding:14px 16px;margin-bottom:18px;text-align:center;box-shadow:0 3px 10px rgba(0,0,0,.15);cursor:pointer">
+  <div style="font-weight:bold;font-size:20px">📲 Uygulamayı Telefona Yükle</div>
+  <div style="font-size:15px;opacity:.95;margin-top:4px">Tek tıkla ana ekrana ekle, internetsiz de çalışsın</div>
+</div>
 <script src="projects.js"></script>
 <script>
+var DEFAULT_PROJECTS = [
+  {
+    id: "ayicikli-yildiz-tulum",
+    title: "Ayıcıklı Yıldız Tulum",
+    sub: "Bebek tulumu • 0–6 ay",
+    cover: "assets/cover-ayicikli-yildiz-tulum.jpg",
+    url: "anleitungen/ayicikli-yildiz-tulum.html",
+    date: "2026-10-22"
+  }
+];
 var grid=document.getElementById('grid'),q=document.getElementById('q'),empty=document.getElementById('empty');
 function toast(t){var e=document.getElementById('toast');e.textContent=t;e.style.display='block';setTimeout(function(){e.style.display='none'},2600)}
 function abs(u){return new URL(u,location.href).href}
@@ -48,7 +62,8 @@ async function paylas(p){
 function render(){
   var s=q.value.trim().toLocaleLowerCase('tr');
   grid.innerHTML='';var n=0;
-  var list=(window.PROJECTS||[]).slice().sort(function(a,b){return (b.date||'').localeCompare(a.date||'')});
+  var rawList=(window.PROJECTS && window.PROJECTS.length) ? window.PROJECTS : DEFAULT_PROJECTS;
+  var list=rawList.slice().sort(function(a,b){return (b.date||'').localeCompare(a.date||'')});
   list.forEach(function(p){
     if(s&&(p.title+' '+(p.sub||'')).toLocaleLowerCase('tr').indexOf(s)<0)return;
     n++;
@@ -65,5 +80,26 @@ function render(){
   empty.style.display=n?'none':'block';
 }
 q.addEventListener('input',render);render();
+
+var deferredPrompt;
+var installBox = document.getElementById('installBox');
+window.addEventListener('beforeinstallprompt', function(e) {
+  e.preventDefault();
+  deferredPrompt = e;
+  installBox.style.display = 'block';
+});
+installBox.addEventListener('click', async function() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    var choice = await deferredPrompt.userChoice;
+    if (choice.outcome === 'accepted') {
+      installBox.style.display = 'none';
+    }
+    deferredPrompt = null;
+  } else {
+    toast('Tarayıcı menüsünden (üç nokta) "Ana Ekrana Ekle" seçin');
+  }
+});
+
 if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(function(){})}
 </script></body></html>

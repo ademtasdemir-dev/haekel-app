@@ -1,6 +1,15 @@
 // Aendere VERSION bei jedem Update, dann laedt das Handy die neuen Dateien.
-const VERSION = 'v1';
-const SHELL = ['./', './index.html', './projects.js', './manifest.webmanifest', './assets/icon-192.png', './assets/icon-512.png'];
+const VERSION = 'v2';
+const SHELL = [
+  './',
+  './index.html',
+  './projects.js',
+  './manifest.webmanifest',
+  './assets/icon-192.png',
+  './assets/icon-512.png',
+  './assets/cover-ayicikli-yildiz-tulum.jpg',
+  './anleitungen/ayicikli-yildiz-tulum.html'
+];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(VERSION).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
 });
